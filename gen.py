@@ -483,7 +483,6 @@ async def main(email, global_name, password, join="", alternative_mail = "", pro
         if page:
             try:
                 page.remove_listener("response", capture_response)
-                page.remove_listener("request", capture_request)
             except:
                 pass
         
