@@ -1,0 +1,2 @@
+# DiscordTokenGenerator
+free
