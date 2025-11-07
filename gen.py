@@ -1,4 +1,3 @@
-from iptime import iptime
 import asyncio
 import random
 import requests
@@ -95,7 +94,7 @@ class Title:
 
 class Status:
     def status():
-        client_id = "put your discord client id for rpc here"
+        client_id = "clientid for rpc. get one from https://discord.dev"
         while True:
             try:
                 RPC = Presence(client_id)
@@ -123,7 +122,7 @@ async def ask(direction, query):
     try:
         headers = {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer api_key_here',
+            'Authorization': 'Bearer groq_api_key',
         }
         json_data = {
             'messages': [
@@ -168,7 +167,7 @@ async def main(email, global_name, password, join="", alternative_mail = "", pro
     _page = None
 
     try:
-        async with AsyncCamoufox(headless=False, humanize=False) as browser:
+        async with AsyncCamoufox(headless=False, humanize=False) as browser: 
             context = await browser.new_context(locale=random.choice(['en-US', 'ko-KR', 'th-TH', 'vi-VN', 'ms-MY', 'pt-BR', 'fr-CA', 'ru-RU']))
             page = await context.new_page()
             await page.bring_to_front()
@@ -216,6 +215,7 @@ async def main(email, global_name, password, join="", alternative_mail = "", pro
                         Log.error("Max attempts reached for text_challenge visibility")
                         return
                     
+                    # After selecting text challenge, wait for prompt to load
                     await puzzle_ifr.locator("#prompt > span").wait_for(state="visible", timeout=10000)
                     
                 except Exception as e:
@@ -249,9 +249,10 @@ async def main(email, global_name, password, join="", alternative_mail = "", pro
                         if "closed" in str(e).lower() or "timeout" in str(e).lower():
                             break
                         
+                        # Retry by refreshing the challenge
                         try:
                             await puzzle_ifr.locator("#menu-refresh").click(timeout=1000)
-                            await asyncio.sleep(2)
+                            await asyncio.sleep(2)  # Wait for refresh to load
                         except:
                             Log.error("Failed to click refresh button")
                         
@@ -406,22 +407,10 @@ async def main(email, global_name, password, join="", alternative_mail = "", pro
                     if not browser_closed:
                         Log.error(f"Response capture error: {str(e)}")
 
-            async def capture_request(request):
-                if request.resource_type == "xhr":
-                    method = request.method
-                    url = request.url
-                    body = request.post_data or "{}"
-                    headers = json.dumps(dict(request.headers))
-                    with open("reqs.txt", "a") as f:
-                        f.write(f"[{method}] {url}\n")
-                        f.write(f"BODY: {body}\n")
-                        f.write(f"HEADER: {headers}\n\n")
-
             await page.goto('http://discord.com/register', timeout=30000)
             add(email_to_use)
 
             page.on("response", capture_response)
-            page.on("request", capture_request)
             
             await page.fill('input[name="email"]', email_to_use)
             await page.fill('input[name="global_name"]', global_name)
@@ -513,28 +502,29 @@ async def main(email, global_name, password, join="", alternative_mail = "", pro
             try:
                 await context.close()
             except Exception as e:
-                print(f"on context close: {str(e)}")
+                print(f"Context close error: {str(e)}")
         
         try:
             await browser.close()
         except Exception as e:
-            print(f"on browser close: {str(e)}")
+            print(f"Browser close error: {str(e)}")
 
 async def main_loop():
     while True:
         try:
-            mail = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(10)) + "@gmail.com" 
+            mail = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(10)) + "@outlook.com" 
             nickname = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(6))
+
             try:
-                result = await asyncio.wait_for(main(mail, nickname, mail + "A!@"), timeout=300)
+                result = await asyncio.wait_for(main(mail, nickname, mail + "A!@", join="invite code"), timeout=300) # join arg is optional. only if you want to make tokens join in a server.
                 print(f"{result}")
             except Exception as e:
-                print(f"gen err {str(e)}")
+                print(f"gen err: {str(e)}")
         except Exception as e:
-            print(f"main_loop err {e}")
+            print(f"main loop err: {str(e)}")
 
 def signal_handler(sig, frame):
-    print('good bye!')
+    print('bye')
     sys.exit(0)
 
 if __name__ == "__main__":
