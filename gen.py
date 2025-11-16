@@ -216,7 +216,7 @@ async def main(email, global_name, password, join="", alternative_mail = "", pro
                         return
                     
                     # After selecting text challenge, wait for prompt to load
-                    await puzzle_ifr.locator("#prompt > span").wait_for(state="visible", timeout=10000)
+                    await puzzle_ifr.locator("#prompt-text > span:nth-child(1)").wait_for(state="visible", timeout=10000)
                     
                 except Exception as e:
                     Log.error(f"Failed to locate or interact with puzzle elements: {str(e)}")
@@ -231,9 +231,9 @@ async def main(email, global_name, password, join="", alternative_mail = "", pro
                     
                 while uuid_result is None and attempts < max_attempts and not browser_closed:
                     try:
-                        await puzzle_ifr.locator("#prompt > span").wait_for(state="visible", timeout=5000)
+                        await puzzle_ifr.locator("#prompt-text > span:nth-child(1)").wait_for(state="visible", timeout=5000)
                         
-                        direction = await puzzle_ifr.locator("#prompt > span").text_content(timeout=5000)
+                        direction = await puzzle_ifr.locator(".prompt-text > span:nth-child(1)").text_content(timeout=5000)
                         q = await puzzle_ifr.locator("#prompt-text > span").text_content(timeout=5000)
                         
                         if last_q != q:
@@ -269,16 +269,16 @@ async def main(email, global_name, password, join="", alternative_mail = "", pro
                     
                 while uuid_result is None and attempts < max_attempts and not browser_closed:
                     try:
-                        prompt_span_locator = puzzle_ifr.locator("#prompt > span")
+                        prompt_span_locator = puzzle_ifr.locator("#prompt-text > span:nth-child(1)")
                         if not await prompt_span_locator.is_visible(timeout=2000):
-                            Log.error("#prompt > span not visible - retrying menu-info and text_challenge")
+                            Log.error("#prompt-text > span:nth-child(1) not visible - retrying menu-info and text_challenge")
                             try:
                                 await puzzle_ifr.locator("#menu-info").click(timeout=1000)
                             except:
                                 pass
 
                         direction = await prompt_span_locator.text_content(timeout=5000)
-                        q = await puzzle_ifr.locator("#prompt-text > span").text_content(timeout=5000)
+                        q = await puzzle_ifr.locator(".prompt-text > span:nth-child(1)").text_content(timeout=5000)
                         if last_q != q:
                             last_q = q
                             a = await ask(direction, q)
